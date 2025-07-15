@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Admin_page</class>
+ <widget class="QWidget" name="Admin_page">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTabWidget" name="adminTabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <!-- Users Tab -->
+     <widget class="QWidget" name="usersTab">
+      <attribute name="title">
+       <string>Users</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_users">
+       <item>
+        <layout class="QHBoxLayout" name="searchUserLayout">
+         <item>
+          <widget class="QLineEdit" name="searchUserInput">
+           <property name="placeholderText">
+            <string>Search User by Username</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="searchUserBtn">
+           <property name="text">
+            <string>Search</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="tableUsers">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>300</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="userDeleteLayout">
+         <item>
+          <widget class="QLineEdit" name="deleteUserInput">
+           <property name="placeholderText">
+            <string>Enter username to delete</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="deleteUserBtn">
+           <property name="text">
+            <string>Delete User</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+
+     <!-- Inventory Tab -->
+     <widget class="QWidget" name="inventoryTab">
+      <attribute name="title">
+       <string>Inventory</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_inventory">
+
+       <!-- Add Item Layout -->
+       <item>
+        <layout class="QHBoxLayout" name="addItemLayout">
+         <item>
+          <widget class="QLineEdit" name="idInput">
+           <property name="placeholderText">
+            <string>ID</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="nameInput">
+           <property name="placeholderText">
+            <string>Name</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="quantityInput">
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>9999</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="priceInput">
+           <property name="minimum">
+            <double>0.00</double>
+           </property>
+           <property name="maximum">
+            <double>9999.99</double>
+           </property>
+           <property name="decimals">
+            <number>2</number>
+           </property>
+           <property name="prefix">
+            <string>Rs </string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="categoryComboBox">
+           <item><property name="text"><string>Electronics</string></property></item>
+           <item><property name="text"><string>Groceries</string></property></item>
+           <item><property name="text"><string>Furniture</string></property></item>
+           <item><property name="text"><string>Cosmetics</string></property></item>
+           <item><property name="text"><string>Clothes</string></property></item>
+           <item><property name="text"><string>Smoking Products</string></property></item>
+           <item><property name="text"><string>Liquors</string></property></item>  <!-- Added Liquors here -->
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="addItemBtn">
+           <property name="text">
+            <string>Add Item</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+
+       <!-- Search Item Layout -->
+       <item>
+        <layout class="QHBoxLayout" name="searchItemLayout">
+         <item>
+          <widget class="QLineEdit" name="searchItemInput">
+           <property name="placeholderText">
+            <string>Search Item by ID or Name</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="searchItemBtn">
+           <property name="text">
+            <string>Search</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+
+       <!-- Category Tabs inside Inventory -->
+       <item>
+        <widget class="QTabWidget" name="categoryTabWidget">
+
+         <widget class="QWidget" name="electronicsTab">
+          <attribute name="title"><string>Electronics</string></attribute>
+          <layout class="QVBoxLayout" name="electronicsLayout">
+           <item>
+            <widget class="QTableWidget" name="tableElectronics">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>300</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+
+         <widget class="QWidget" name="groceriesTab">
+          <attribute name="title"><string>Groceries</string></attribute>
+          <layout class="QVBoxLayout" name="groceriesLayout">
+           <item>
+            <widget class="QTableWidget" name="tableGroceries">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>300</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+
+         <widget class="QWidget" name="furnitureTab">
+          <attribute name="title"><string>Furniture</string></attribute>
+          <layout class="QVBoxLayout" name="furnitureLayout">
+           <item>
+            <widget class="QTableWidget" name="tableFurniture">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>300</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+
+         <widget class="QWidget" name="cosmeticsTab">
+          <attribute name="title"><string>Cosmetics</string></attribute>
+          <layout class="QVBoxLayout" name="cosmeticsLayout">
+           <item>
+            <widget class="QTableWidget" name="tableCosmetics">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>300</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+
+         <widget class="QWidget" name="clothesTab">
+          <attribute name="title"><string>Clothes</string></attribute>
+          <layout class="QVBoxLayout" name="clothesLayout">
+           <item>
+            <widget class="QTableWidget" name="tableClothes">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>300</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+
+         <widget class="QWidget" name="smokingTab">
+          <attribute name="title"><string>Smoking Products</string></attribute>
+          <layout class="QVBoxLayout" name="smokingLayout">
+           <item>
+            <widget class="QTableWidget" name="tableSmoking">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>300</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+
+         <!-- New Liquors Tab -->
+         <widget class="QWidget" name="liquorsTab">
+          <attribute name="title"><string>Liquors</string></attribute>
+          <layout class="QVBoxLayout" name="liquorsLayout">
+           <item>
+            <widget class="QTableWidget" name="tableLiquors">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>300</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+
+        </widget>
+       </item>
+
+       <!-- Remove Item Layout -->
+       <item>
+        <layout class="QHBoxLayout" name="itemRemoveLayout">
+         <item>
+          <widget class="QLineEdit" name="removeIdInput">
+           <property name="placeholderText">
+            <string>Enter item ID to remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="removeItemBtn">
+           <property name="text">
+            <string>Remove Item</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+
+      </layout>
+     </widget>
+    </widget>
+   </item>
+
+   <!-- Bottom Buttons -->
+   <item>
+    <layout class="QHBoxLayout" name="adminControls">
+     <item>
+      <widget class="QPushButton" name="refreshBtn">
+       <property name="text"><string>Refresh Tables</string></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="logoutBtn">
+       <property name="text"><string>Logout</string></property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

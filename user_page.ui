@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>User_page</class>
+ <widget class="QWidget" name="User_page">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>User Page</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+
+<!-- Search bar layout -->
+<item>
+ <layout class="QHBoxLayout" name="searchLayout">
+  <item>
+   <widget class="QLineEdit" name="searchItemInput">
+    <property name="placeholderText">
+     <string>Search by item name or category</string>
+    </property>
+   </widget>
+  </item>
+  <item>
+   <widget class="QPushButton" name="searchItemBtn">
+    <property name="text">
+     <string>Search</string>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>:/icons/search.png</normaloff>
+     </iconset>
+    </property>
+    <property name="toolTip">
+     <string>Search Items</string>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>100</width>
+      <height>30</height>
+     </size>
+    </property>
+   </widget>
+  </item>
+ </layout>
+</item>
+
+   <!-- Category tabs -->
+   <item>
+    <widget class="QTabWidget" name="categoryTabs">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabGroceries">
+      <attribute name="title">
+       <string>Groceries</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayoutGroceries">
+       <item>
+        <widget class="QTableWidget" name="groceriesTable"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabElectronics">
+      <attribute name="title">
+       <string>Electronics</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayoutElectronics">
+       <item>
+        <widget class="QTableWidget" name="electronicsTable"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabLiquors">
+      <attribute name="title">
+       <string>Liquors</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayoutLiquors">
+       <item>
+        <widget class="QTableWidget" name="liquorsTable"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabSmokingProducts">
+      <attribute name="title">
+       <string>Smoking Products</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayoutSmoking">
+       <item>
+        <widget class="QTableWidget" name="smokingTable"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabCosmetics">
+      <attribute name="title">
+       <string>Cosmetics</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayoutCosmetics">
+       <item>
+        <widget class="QTableWidget" name="cosmeticsTable"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabClothes">
+      <attribute name="title">
+       <string>Clothes</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayoutClothes">
+       <item>
+        <widget class="QTableWidget" name="clothesTable"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabFurniture">
+      <attribute name="title">
+       <string>Furniture</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayoutFurniture">
+       <item>
+        <widget class="QTableWidget" name="furnitureTable"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+
+   <!-- Buttons and inputs -->
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayoutButtons">
+     <item>
+      <widget class="QPushButton" name="addToCartBtn">
+       <property name="text">
+        <string>Add to Cart</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="quantityInput">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="increaseQtyBtn">
+       <property name="text">
+        <string>+</string>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>25</width>
+         <height>25</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="decreaseQtyBtn">
+       <property name="text">
+        <string>-</string>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>25</width>
+         <height>25</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="checkoutBtn">
+       <property name="text">
+        <string>Checkout</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="viewCartBtn">
+       <property name="text">
+        <string>View Cart</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="feedbackBtn">
+       <property name="text">
+        <string>Feedback</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="settingsBtn">
+       <property name="text">
+        <string>Settings</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+   <!-- Bottom row with Refresh and Logout buttons -->
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayoutLogoutRefresh">
+     <item>
+      <widget class="QPushButton" name="refreshBtn">
+       <property name="text">
+        <string>Refresh</string>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>30</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="logoutBtn">
+       <property name="text">
+        <string>Logout</string>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>120</width>
+         <height>30</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
