@@ -4,10 +4,9 @@
 #include "backend_classes.h"
 #include <QTableWidgetItem>
 #include <QMessageBox>
-#include <QSqlQuery>
-#include <QSqlError>
-#include <QDebug>
 #include <QTimer>
+#include <QHeaderView>
+#include <QPushButton>
 
 CheckoutPage::CheckoutPage(const QString& user, OrderManager& orders, InventoryManager& inv, QWidget *parent)
     : QWidget(parent),
@@ -18,30 +17,30 @@ CheckoutPage::CheckoutPage(const QString& user, OrderManager& orders, InventoryM
 {
     ui->setupUi(this);
 
-    // Cart Table Setup
-    ui->cartTable->setColumnCount(4);
-    ui->cartTable->setHorizontalHeaderLabels({"Item Name", "Price (Rs.)", "Quantity", "Subtotal (Rs.)"});
+    // Set up cart table with 6 columns including buttons
+    ui->cartTable->setColumnCount(6);
+    ui->cartTable->setHorizontalHeaderLabels({"Item Name", "Price (Rs.)", "Quantity", "Subtotal (Rs.)", "-", "Remove"});
     ui->cartTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->cartTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->cartTable->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    ui->cartTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    ui->cartTable->setColumnWidth(1, 100);
-    ui->cartTable->setColumnWidth(2, 80);
-    ui->cartTable->setColumnWidth(3, 120);
+    // Resize columns for better layout
+    ui->cartTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);  // Item Name stretches
+    ui->cartTable->setColumnWidth(1, 100);  // Price
+    ui->cartTable->setColumnWidth(2, 80);   // Quantity
+    ui->cartTable->setColumnWidth(3, 120);  // Subtotal
+    ui->cartTable->setColumnWidth(4, 40);   // Decrease button (a bit wider for '-')
+    ui->cartTable->setColumnWidth(5, 90);   // Remove button
 
-    // Bill Table Setup
+    // Bill Table Setup (no changes here)
     ui->billTable->setColumnCount(3);
     ui->billTable->setHorizontalHeaderLabels({"Product", "Quantity", "Amount (Rs.)"});
     ui->billTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->billTable->setColumnWidth(1, 80);
     ui->billTable->setColumnWidth(2, 120);
-
     ui->billTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->billTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->billTable->setSelectionMode(QAbstractItemView::SingleSelection);
-
-
 
     populateCartTable();
     ui->stackedWidget->setCurrentWidget(ui->pageCartView);
@@ -69,6 +68,7 @@ void CheckoutPage::populateCartTable()
         double subtotal = price * quantity;
         total += subtotal;
 
+        // Set table items
         ui->cartTable->setItem(i, 0, new QTableWidgetItem(itemName));
 
         QTableWidgetItem* priceItem = new QTableWidgetItem(QString::number(price, 'f', 2));
@@ -82,12 +82,78 @@ void CheckoutPage::populateCartTable()
         QTableWidgetItem* subtotalItem = new QTableWidgetItem(QString::number(subtotal, 'f', 2));
         subtotalItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         ui->cartTable->setItem(i, 3, subtotalItem);
+
+        // Create decrease quantity button ('-')
+        QPushButton* decButton = new QPushButton("-");
+        decButton->setFixedSize(30, 24);
+
+        QWidget* decButtonWidget = new QWidget();
+        QHBoxLayout* decLayout = new QHBoxLayout(decButtonWidget);
+        decLayout->addWidget(decButton);
+        decLayout->setContentsMargins(0, 0, 0, 0);
+        decLayout->setAlignment(Qt::AlignCenter);
+        ui->cartTable->setCellWidget(i, 4, decButtonWidget);
+
+        connect(decButton, &QPushButton::clicked, this, [this, i]() {
+            auto cartItems = orderManager.getCartItems(username.toStdString());
+            if (i >= 0 && i < static_cast<int>(cartItems.size())) {
+                int itemId = cartItems[i].itemId;
+                if (!orderManager.decreaseOrderQuantity(username.toStdString(), itemId)) {
+                    QMessageBox::information(this, "Quantity", "Cannot decrease quantity below 1.");
+                } else {
+                    populateCartTable();
+                }
+            }
+        });
+
+        // Create remove item button
+        QPushButton* remButton = new QPushButton("Remove");
+        remButton->setFixedSize(60, 24);
+
+        QWidget* remButtonWidget = new QWidget();
+        QHBoxLayout* remLayout = new QHBoxLayout(remButtonWidget);
+        remLayout->addWidget(remButton);
+        remLayout->setContentsMargins(0, 0, 0, 0);
+        remLayout->setAlignment(Qt::AlignCenter);
+        ui->cartTable->setCellWidget(i, 5, remButtonWidget);
+
+        connect(remButton, &QPushButton::clicked, this, [this, i]() {
+            auto cartItems = orderManager.getCartItems(username.toStdString());
+            if (i >= 0 && i < static_cast<int>(cartItems.size())) {
+                int itemId = cartItems[i].itemId;
+                orderManager.removeFromCart(username.toStdString(), itemId);
+                populateCartTable();
+            }
+        });
     }
 
     ui->labelBill->setText(
         QString("Your bill is Rs. %1. Please pay at the counter or deposit to bank account number 123456.")
             .arg(QString::number(total, 'f', 2))
         );
+}
+
+void CheckoutPage::onRemoveButtonClicked(int row)
+{
+    auto cartItems = orderManager.getCartItems(username.toStdString());
+    if (row >= 0 && row < static_cast<int>(cartItems.size())) {
+        int itemId = cartItems[row].itemId;
+        orderManager.removeFromCart(username.toStdString(), itemId);
+        populateCartTable();
+    }
+}
+
+void CheckoutPage::onDecreaseButtonClicked(int row)
+{
+    auto cartItems = orderManager.getCartItems(username.toStdString());
+    if (row >= 0 && row < static_cast<int>(cartItems.size())) {
+        int itemId = cartItems[row].itemId;
+        if (!orderManager.decreaseOrderQuantity(username.toStdString(), itemId)) {
+            QMessageBox::information(this, "Quantity", "Cannot decrease quantity below 1.");
+        } else {
+            populateCartTable();
+        }
+    }
 }
 
 void CheckoutPage::populateBillTable()
@@ -129,43 +195,6 @@ void CheckoutPage::populateBillTable()
     QTableWidgetItem* grandTotalItem = new QTableWidgetItem(QString::number(grandTotal, 'f', 2));
     grandTotalItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     ui->billTable->setItem(cartItems.size(), 2, grandTotalItem);
-}
-
-void CheckoutPage::onRemoveItemClicked()
-{
-    int row = ui->cartTable->currentRow();
-    if (row < 0) {
-        QMessageBox::warning(this, "Remove Item", "Please select an item in the cart to remove.");
-        return;
-    }
-
-    auto cartItems = orderManager.getCartItems(username.toStdString());
-    if (row >= static_cast<int>(cartItems.size())) return;
-
-    int itemId = cartItems[row].itemId;
-    orderManager.removeFromCart(username.toStdString(), itemId);
-
-    populateCartTable();
-}
-
-void CheckoutPage::onDecreaseQuantityClicked()
-{
-    int row = ui->cartTable->currentRow();
-    if (row < 0) {
-        QMessageBox::warning(this, "Decrease Quantity", "Please select an item in the cart.");
-        return;
-    }
-
-    auto cartItems = orderManager.getCartItems(username.toStdString());
-    if (row >= static_cast<int>(cartItems.size())) return;
-
-    int itemId = cartItems[row].itemId;
-
-    if (!orderManager.decreaseOrderQuantity(username.toStdString(), itemId)) {
-        QMessageBox::information(this, "Quantity", "Cannot decrease quantity below 1.");
-    } else {
-        populateCartTable();
-    }
 }
 
 void CheckoutPage::on_backButton_clicked()

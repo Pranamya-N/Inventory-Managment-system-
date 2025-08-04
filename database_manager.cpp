@@ -41,9 +41,27 @@ void DatabaseManager::setupTables()
             name TEXT,
             quantity INTEGER,
             price REAL,
-            category TEXT
+            category TEXT,
+            description TEXT
         )
     )");
+
+    // If inventory table existed without 'description', check and add it
+    query.exec("PRAGMA table_info(inventory)");
+    bool hasDescription = false;
+    while (query.next()) {
+        QString colName = query.value(1).toString();
+        if (colName == "description") {
+            hasDescription = true;
+            break;
+        }
+    }
+
+    if (!hasDescription) {
+        QSqlQuery alterQuery;
+        alterQuery.exec("ALTER TABLE inventory ADD COLUMN description TEXT");
+        qDebug() << "Added 'description' column to inventory table.";
+    }
 
     // 3. Cart table
     query.exec(R"(
@@ -56,7 +74,7 @@ void DatabaseManager::setupTables()
         )
     )");
 
-    // 4. Orders table (create basic structure if not exists)
+    // 4. Orders table
     query.exec(R"(
         CREATE TABLE IF NOT EXISTS orders (
             orderId INTEGER PRIMARY KEY AUTOINCREMENT,

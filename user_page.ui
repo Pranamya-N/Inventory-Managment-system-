@@ -14,42 +14,37 @@
    <string>User Page</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-
-<!-- Search bar layout -->
-<item>
- <layout class="QHBoxLayout" name="searchLayout">
-  <item>
-   <widget class="QLineEdit" name="searchItemInput">
-    <property name="placeholderText">
-     <string>Search by item name or category</string>
-    </property>
-   </widget>
-  </item>
-  <item>
-   <widget class="QPushButton" name="searchItemBtn">
-    <property name="text">
-     <string>Search</string>
-    </property>
-    <property name="icon">
-     <iconset>
-      <normaloff>:/icons/search.png</normaloff>
-     </iconset>
-    </property>
-    <property name="toolTip">
-     <string>Search Items</string>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>100</width>
-      <height>30</height>
-     </size>
-    </property>
-   </widget>
-  </item>
- </layout>
-</item>
-
-   <!-- Category tabs -->
+   <item>
+    <layout class="QHBoxLayout" name="searchLayout">
+     <item>
+      <widget class="QLineEdit" name="searchItemInput">
+       <property name="placeholderText">
+        <string>Search by item name or category</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="searchItemBtn">
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Search Items</string>
+       </property>
+       <property name="text">
+        <string>Search</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>:/icons/search.png</normaloff>:/icons/search.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item>
     <widget class="QTabWidget" name="categoryTabs">
      <property name="currentIndex">
@@ -61,7 +56,33 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayoutGroceries">
        <item>
-        <widget class="QTableWidget" name="groceriesTable"/>
+        <widget class="QTableWidget" name="groceriesTable">
+         <column>
+          <property name="text">
+           <string>ID</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Price</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Quantity</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Description</string>
+          </property>
+         </column>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -71,7 +92,33 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayoutElectronics">
        <item>
-        <widget class="QTableWidget" name="electronicsTable"/>
+        <widget class="QTableWidget" name="electronicsTable">
+         <column>
+          <property name="text">
+           <string>ID</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Price</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Quantity</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Description</string>
+          </property>
+         </column>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -81,7 +128,33 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayoutLiquors">
        <item>
-        <widget class="QTableWidget" name="liquorsTable"/>
+        <widget class="QTableWidget" name="liquorsTable">
+         <column>
+          <property name="text">
+           <string>ID</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Price</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Quantity</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Description</string>
+          </property>
+         </column>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -91,7 +164,33 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayoutSmoking">
        <item>
-        <widget class="QTableWidget" name="smokingTable"/>
+        <widget class="QTableWidget" name="smokingTable">
+         <column>
+          <property name="text">
+           <string>ID</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Price</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Quantity</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Description</string>
+          </property>
+         </column>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -101,7 +200,33 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayoutCosmetics">
        <item>
-        <widget class="QTableWidget" name="cosmeticsTable"/>
+        <widget class="QTableWidget" name="cosmeticsTable">
+         <column>
+          <property name="text">
+           <string>ID</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Price</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Quantity</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Description</string>
+          </property>
+         </column>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -111,7 +236,33 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayoutClothes">
        <item>
-        <widget class="QTableWidget" name="clothesTable"/>
+        <widget class="QTableWidget" name="clothesTable">
+         <column>
+          <property name="text">
+           <string>ID</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Price</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Quantity</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Description</string>
+          </property>
+         </column>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -121,14 +272,38 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayoutFurniture">
        <item>
-        <widget class="QTableWidget" name="furnitureTable"/>
+        <widget class="QTableWidget" name="furnitureTable">
+         <column>
+          <property name="text">
+           <string>ID</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Price</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Quantity</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Description</string>
+          </property>
+         </column>
+        </widget>
        </item>
       </layout>
      </widget>
     </widget>
    </item>
-
-   <!-- Buttons and inputs -->
    <item>
     <layout class="QHBoxLayout" name="horizontalLayoutButtons">
      <item>
@@ -150,27 +325,27 @@
      </item>
      <item>
       <widget class="QPushButton" name="increaseQtyBtn">
-       <property name="text">
-        <string>+</string>
-       </property>
        <property name="maximumSize">
         <size>
          <width>25</width>
          <height>25</height>
         </size>
+       </property>
+       <property name="text">
+        <string>+</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="decreaseQtyBtn">
-       <property name="text">
-        <string>-</string>
-       </property>
        <property name="maximumSize">
         <size>
          <width>25</width>
          <height>25</height>
         </size>
+       </property>
+       <property name="text">
+        <string>-</string>
        </property>
       </widget>
      </item>
@@ -204,27 +379,25 @@
      </item>
     </layout>
    </item>
-
-   <!-- Bottom row with Refresh and Logout buttons -->
    <item>
     <layout class="QHBoxLayout" name="horizontalLayoutLogoutRefresh">
      <item>
       <widget class="QPushButton" name="refreshBtn">
-       <property name="text">
-        <string>Refresh</string>
-       </property>
        <property name="minimumSize">
         <size>
          <width>100</width>
          <height>30</height>
         </size>
        </property>
+       <property name="text">
+        <string>Refresh</string>
+       </property>
       </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -236,20 +409,19 @@
      </item>
      <item>
       <widget class="QPushButton" name="logoutBtn">
-       <property name="text">
-        <string>Logout</string>
-       </property>
        <property name="minimumSize">
         <size>
          <width>120</width>
          <height>30</height>
         </size>
        </property>
+       <property name="text">
+        <string>Logout</string>
+       </property>A
       </widget>
      </item>
     </layout>
    </item>
-
   </layout>
  </widget>
  <resources/>

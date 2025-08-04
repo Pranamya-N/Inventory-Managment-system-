@@ -37,8 +37,8 @@ User_page::User_page(const QString& user, InventoryManager& inv, OrderManager& o
         QTableWidget* table = getTableForCategory(tabIndexToCategory[i]);
         if (!table) continue;
 
-        table->setColumnCount(5);
-        table->setHorizontalHeaderLabels({"ID", "Name", "Available Stock", "Price", "Buy"});
+        table->setColumnCount(6);
+        table->setHorizontalHeaderLabels({"ID", "Name", "Available Stock", "Price", "Description", "Buy"});
         table->setSelectionBehavior(QAbstractItemView::SelectRows);
         table->setEditTriggers(QAbstractItemView::NoEditTriggers);
         table->setAlternatingRowColors(true);
@@ -47,7 +47,8 @@ User_page::User_page(const QString& user, InventoryManager& inv, OrderManager& o
         table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
         table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
         table->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
-        table->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
+        table->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Stretch);
+        table->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
 
         connect(table, &QTableWidget::cellClicked, this, [this, table](int row, int) {
             QTableWidgetItem* idItem = table->item(row, 0);
@@ -100,11 +101,21 @@ void User_page::loadItemsForCategory(const QString& category)
     QTableWidget* table = getTableForCategory(category);
     if (!table) return;
 
-    // IMPORTANT: Disconnect all previous connections to prevent double execution
     table->disconnect();
-
     table->clearContents();
     table->setRowCount(0);
+    table->setColumnCount(6);
+    table->setHorizontalHeaderLabels({"ID", "Name", "Available Stock", "Price", "Description", "Buy"});
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table->setAlternatingRowColors(true);
+
+    table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    table->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    table->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
+    table->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
 
     QVector<InventoryItem> filteredItems;
     for (const auto& item : inventory.getAllItems()) {
@@ -117,20 +128,27 @@ void User_page::loadItemsForCategory(const QString& category)
 
     for (int row = 0; row < filteredItems.size(); ++row) {
         const auto& item = filteredItems[row];
+
         table->setItem(row, 0, new QTableWidgetItem(QString::number(item.id)));
         table->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(item.name)));
         table->setItem(row, 2, new QTableWidgetItem(QString::number(item.quantity)));
         table->setItem(row, 3, new QTableWidgetItem(QString::number(item.price, 'f', 2)));
 
-        // Create new button for each row
+        // View Description Button
+        QPushButton* viewDescBtn = new QPushButton("View");
+        viewDescBtn->setFixedSize(80, 25);
+        viewDescBtn->setStyleSheet("QPushButton { font-size: 10px; padding: 2px; }");
+        connect(viewDescBtn, &QPushButton::clicked, this, [item]() {
+            QMessageBox::information(nullptr, "Item Description", QString::fromStdString(item.description));
+        });
+        table->setCellWidget(row, 4, viewDescBtn);
+
+        // Buy Button
         QPushButton* buyBtn = new QPushButton("Buy");
         buyBtn->setProperty("itemId", item.id);
         buyBtn->setProperty("itemName", QString::fromStdString(item.name));
         buyBtn->setProperty("category", category);
-
-        // Use single shot connection to prevent multiple executions
         connect(buyBtn, &QPushButton::clicked, this, [this, item, category]() {
-            // Get fresh data to ensure accuracy
             auto allItems = inventory.getAllItems();
             auto it = std::find_if(allItems.begin(), allItems.end(), [item](const InventoryItem& i) {
                 return i.id == item.id;
@@ -152,27 +170,20 @@ void User_page::loadItemsForCategory(const QString& category)
                                            1, 1, it->quantity, 1, &ok);
             if (!ok) return;
 
-            // Double-check stock before adding to cart
-            if (it->quantity < qty) {
-                QMessageBox::warning(this, "Insufficient Stock", "Not enough stock available.");
-                return;
-            }
-
             if (orderManager.addToCart(username.toStdString(), item.id, qty)) {
                 QMessageBox::information(this, "Added to Cart",
                                          QString("Added %1 x %2 to your cart.")
                                              .arg(qty)
                                              .arg(QString::fromStdString(item.name)));
-                loadItemsForCategory(category);  // Refresh the current category
+                loadItemsForCategory(category);
             } else {
                 QMessageBox::warning(this, "Failed", "Could not add item to cart.");
             }
         });
 
-        table->setCellWidget(row, 4, buyBtn);
+        table->setCellWidget(row, 5, buyBtn);
     }
 
-    // Reconnect the cell click handler ONCE per table
     connect(table, &QTableWidget::cellClicked, this, [this, table](int row, int) {
         QTableWidgetItem* idItem = table->item(row, 0);
         if (idItem) {
@@ -181,6 +192,7 @@ void User_page::loadItemsForCategory(const QString& category)
         }
     });
 }
+
 
 void User_page::on_addToCartBtn_clicked()
 {
@@ -375,6 +387,9 @@ void User_page::on_searchItemBtn_clicked()
         QTableWidget* table = getTableForCategory(category);
         if (!table) continue;
 
+        table->setColumnCount(6);
+        table->setHorizontalHeaderLabels({"ID", "Name", "Available Stock", "Price", "Description", "Buy"});
+
         table->setRowCount(items.size());
 
         for (int row = 0; row < items.size(); ++row) {
@@ -383,6 +398,7 @@ void User_page::on_searchItemBtn_clicked()
             table->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(item.name)));
             table->setItem(row, 2, new QTableWidgetItem(QString::number(item.quantity)));
             table->setItem(row, 3, new QTableWidgetItem(QString::number(item.price, 'f', 2)));
+            table->setItem(row, 4, new QTableWidgetItem(QString::fromStdString(item.description)));
 
             QPushButton* buyBtn = new QPushButton("Buy");
             buyBtn->setProperty("itemId", item.id);
@@ -422,7 +438,7 @@ void User_page::on_searchItemBtn_clicked()
                 }
             });
 
-            table->setCellWidget(row, 4, buyBtn);
+            table->setCellWidget(row, 5, buyBtn);
         }
     }
 }

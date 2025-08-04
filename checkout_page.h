@@ -24,8 +24,8 @@ signals:
     void logoutRequested();
 
 private slots:
-    void onRemoveItemClicked();
-    void onDecreaseQuantityClicked();
+    void onRemoveButtonClicked(int row);
+    void onDecreaseButtonClicked(int row);
     void on_backButton_clicked();
     void on_confirmOrderButton_clicked();
     void on_billBackButton_clicked();

@@ -96,18 +96,22 @@ bool UserDataStore::deleteUser(const string& username)
 
 // ------------------ InventoryManager ------------------
 
-void InventoryManager::addItem(const InventoryItem& item)
-{
-    QSqlQuery q;
-    q.prepare("INSERT OR REPLACE INTO inventory (id, name, quantity, price, category) VALUES (?, ?, ?, ?, ?)");
-    q.addBindValue(item.id);
-    q.addBindValue(QString::fromStdString(item.name));
-    q.addBindValue(item.quantity);
-    q.addBindValue(item.price);
-    q.addBindValue(QString::fromStdString(item.category));
-    if (!q.exec())
-        qDebug() << "addItem failed:" << q.lastError().text();
+void InventoryManager::addItem(const InventoryItem& item) {
+    QSqlQuery query;
+    query.prepare("INSERT OR REPLACE INTO inventory (id, name, quantity, price, category, description) "
+                  "VALUES (:id, :name, :quantity, :price, :category, :description)");
+    query.bindValue(":id", item.id);
+    query.bindValue(":name", QString::fromStdString(item.name));
+    query.bindValue(":quantity", item.quantity);
+    query.bindValue(":price", item.price);
+    query.bindValue(":category", QString::fromStdString(item.category));
+    query.bindValue(":description", QString::fromStdString(item.description)); // ✅ MUST include this line
+
+    if (!query.exec()) {
+        qDebug() << "AddItem Error:" << query.lastError().text();
+    }
 }
+
 
 void InventoryManager::showItems() const
 {
@@ -127,7 +131,7 @@ void InventoryManager::showItems() const
 bool InventoryManager::getItem(int id, InventoryItem& resultItem) const
 {
     QSqlQuery q;
-    q.prepare("SELECT id, name, quantity, price, category FROM inventory WHERE id = ?");
+    q.prepare("SELECT id, name, quantity, price, category, description FROM inventory WHERE id = ?");
     q.addBindValue(id);
     if (!q.exec())
     {
@@ -141,6 +145,7 @@ bool InventoryManager::getItem(int id, InventoryItem& resultItem) const
         resultItem.quantity = q.value(2).toInt();
         resultItem.price = q.value(3).toDouble();
         resultItem.category = q.value(4).toString().toStdString();
+        resultItem.description = q.value(5).toString().toStdString();
         return true;
     }
     return false;
@@ -169,6 +174,29 @@ void InventoryManager::updateItemQuantity(int id, int newQuantity)
         qDebug() << "updateItemQuantity failed:" << q.lastError().text();
 }
 
+bool InventoryManager::updateItemPriceAndQuantity(int id, double priceIncrease, int quantityIncrease) {
+    InventoryItem item;
+    if (!getItem(id, item)) {
+        qDebug() << "updateItemPriceAndQuantity: Item not found, id=" << id;
+        return false;
+    }
+
+    double newPrice = item.price + priceIncrease;
+    int newQuantity = item.quantity + quantityIncrease;
+
+    QSqlQuery q;
+    q.prepare("UPDATE inventory SET price = ?, quantity = ? WHERE id = ?");
+    q.addBindValue(newPrice);
+    q.addBindValue(newQuantity);
+    q.addBindValue(id);
+
+    if (!q.exec()) {
+        qDebug() << "updateItemPriceAndQuantity failed:" << q.lastError().text();
+        return false;
+    }
+    return true;
+}
+
 void InventoryManager::setItemQuantity(int id, int newQuantity)
 {
     QSqlQuery q;
@@ -193,7 +221,7 @@ const vector<InventoryItem>& InventoryManager::getAllItems() const
     static vector<InventoryItem> cache;
     cache.clear();
 
-    QSqlQuery q("SELECT id, name, quantity, price, category FROM inventory");
+    QSqlQuery q("SELECT id, name, quantity, price, category, description FROM inventory");
     while (q.next())
     {
         InventoryItem item;
@@ -202,10 +230,12 @@ const vector<InventoryItem>& InventoryManager::getAllItems() const
         item.quantity = q.value(2).toInt();
         item.price = q.value(3).toDouble();
         item.category = q.value(4).toString().toStdString();
+        item.description = q.value(5).toString().toStdString();
         cache.push_back(item);
     }
     return cache;
 }
+
 
 double InventoryManager::getPrice(int id) const
 {
@@ -272,6 +302,21 @@ bool InventoryManager::decreaseQuantity(int itemId, int amount)
     }
 
     qDebug() << "Successfully decreased quantity for item" << itemId << "from" << currentQuantity << "to" << newQuantity;
+    return true;
+}
+
+bool InventoryManager::updateItemDescription(int id, const std::string& newDescription)
+{
+    QSqlQuery query;
+    query.prepare("UPDATE inventory SET description = ? WHERE id = ?");
+    query.addBindValue(QString::fromStdString(newDescription));
+    query.addBindValue(id);
+
+    if (!query.exec())
+    {
+        qDebug() << "updateItemDescription failed:" << query.lastError().text();
+        return false;
+    }
     return true;
 }
 

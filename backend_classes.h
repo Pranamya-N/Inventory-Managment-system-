@@ -1,5 +1,3 @@
-
-
 #ifndef BACKEND_CLASSES_H
 #define BACKEND_CLASSES_H
 
@@ -23,9 +21,11 @@ struct InventoryItem {
     int quantity;
     double price;
     std::string category;
+    std::string description;  // ✅ Add this line
 
     void display() const;
 };
+
 
 struct Order {
     int orderId;
@@ -73,6 +73,11 @@ public:
     bool hasItem(int id) const;
     bool decreaseQuantity(int itemId, int amount);
 
+    // NEW FUNCTION TO UPDATE PRICE AND QUANTITY
+    bool updateItemPriceAndQuantity(int id, double priceIncrease, int quantityIncrease);
+
+    // NEW FUNCTION TO UPDATE ITEM DESCRIPTION
+    bool updateItemDescription(int id, const std::string& newDescription);
 };
 
 class OrderManager {

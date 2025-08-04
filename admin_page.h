@@ -1,8 +1,10 @@
 #ifndef ADMIN_PAGE_H
 #define ADMIN_PAGE_H
-#include "mainwindow.h"
+
 #include <QWidget>
 #include <QTableWidget>
+#include <QLineEdit>      // For QLineEdit usage
+#include <QPushButton>    // For QPushButton usage
 #include "backend_classes.h"
 
 namespace Ui {
@@ -14,39 +16,44 @@ class Admin_page : public QWidget
     Q_OBJECT
 
 public:
-    Admin_page(InventoryManager& inventoryRef, UserDataStore& userDataRef, QWidget* parent = nullptr);
-
+    explicit Admin_page(UserDataStore& userDataRef, InventoryManager& inventoryRef, QWidget* parent = nullptr);
     ~Admin_page();
 
 signals:
     void logoutRequested();
 
 private slots:
-    // Inventory tab slots
-    void on_addItemBtn_clicked();
-    void on_removeItemBtn_clicked();
-    void on_searchItemBtn_clicked();
+    // User tab
+    void onSearchUser();
+    void onDeleteUser();
 
-    // Users tab slots
-    void on_deleteUserBtn_clicked();
-    void on_searchUserBtn_clicked();
+    // Inventory tab
+    void onAddItem();
+    void onRemoveItem();
+    void onSearchItem();
+    void onUpdateItem();
+    void onAddDescription();  // <-- New slot added here
 
-    // Shared slots
-    void on_refreshBtn_clicked();
-    void on_logoutBtn_clicked();
+    // Shared
+    void refreshAllTables();
 
 private:
     Ui::Admin_page *ui;
 
-    InventoryManager& inventory;
-    UserDataStore& userData;
+    UserDataStore& userDataStore;
+    InventoryManager& inventoryManager;
 
-    void loadItemsToTable(const QString &category, QTableWidget *table, const QString &search = "");
-    void refreshAllItemTables(const QString &search = "");
-    void loadUsersToTable(const QString &search = "");
-    void refreshUsersTable();
+    // Helper functions
+    void setupUserTable();
+    void setupInventoryTables();
 
-    // Add a helper method to get table pointer by category (optional but recommended)
+    void populateUserTable();
+    void populateInventoryTables();
+
+    void clearAddItemInputs();
+    void clearUpdateInputs();
+
+    // Optional: get inventory table widget pointer by category string
     QTableWidget* getTableForCategory(const QString& category);
 };
 

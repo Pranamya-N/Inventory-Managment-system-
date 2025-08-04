@@ -252,7 +252,7 @@ void MainWindow::on_loginBtn_clicked()
                 adminPageWidget = nullptr;
             }
 
-            adminPageWidget = new Admin_page(inventory, userData, this);
+            adminPageWidget = new Admin_page(userData, inventory, this);
             ui->stackedWidget->addWidget(adminPageWidget);
             ui->stackedWidget->setCurrentWidget(adminPageWidget);
 

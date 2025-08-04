@@ -1,195 +1,432 @@
 #include "admin_page.h"
 #include "ui_admin_page.h"
-#include "backend_classes.h"
 
 #include <QMessageBox>
+#include <QDebug>
+#include <QString>
 #include <QTableWidgetItem>
 #include <QHeaderView>
 
-Admin_page::Admin_page(InventoryManager& inv, UserDataStore& users, QWidget *parent)
-    : QWidget(parent),
+Admin_page::Admin_page(UserDataStore& userStore, InventoryManager& inventoryMgr, QWidget *parent) :
+    QWidget(parent),
     ui(new Ui::Admin_page),
-    inventory(inv),
-    userData(users)
+    userDataStore(userStore),
+    inventoryManager(inventoryMgr)
 {
     ui->setupUi(this);
 
-    ui->priceInput->setMaximum(1000000.00); // Max Rs 10 lakhs
+    // Setup tables with headers
+    setupUserTable();
+    setupInventoryTables();
 
-    // Setup users table
-    ui->tableUsers->setColumnCount(4);
-    ui->tableUsers->setHorizontalHeaderLabels({"Username", "Password", "Role", "Status"});
-    ui->tableUsers->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    // Connect buttons to slots
+    connect(ui->searchUserBtn, &QPushButton::clicked, this, &Admin_page::onSearchUser);
+    connect(ui->deleteUserBtn, &QPushButton::clicked, this, &Admin_page::onDeleteUser);
+    connect(ui->addItemBtn, &QPushButton::clicked, this, &Admin_page::onAddItem);
+    connect(ui->updateItemBtn, &QPushButton::clicked, this, &Admin_page::onUpdateItem);
+    connect(ui->searchItemBtn, &QPushButton::clicked, this, &Admin_page::onSearchItem);
+    connect(ui->removeItemBtn, &QPushButton::clicked, this, &Admin_page::onRemoveItem);
+    connect(ui->refreshBtn, &QPushButton::clicked, this, &Admin_page::refreshAllTables);
+    connect(ui->logoutBtn, &QPushButton::clicked, this, &Admin_page::logoutRequested);
 
-    // Setup item tables column headers
-    QStringList itemHeaders = {"ID", "Name", "Quantity", "Price (Rs)"};
-    auto setupItemTable = [&](QTableWidget* table) {
-        table->setColumnCount(itemHeaders.size());
-        table->setHorizontalHeaderLabels(itemHeaders);
-        table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    };
+    // **Connect Add Description button here** (replace addDescriptionBtn with actual button name)
+    connect(ui->addDescriptionBtn, &QPushButton::clicked, this, &Admin_page::onAddDescription);
 
-    setupItemTable(ui->tableElectronics);
-    setupItemTable(ui->tableGroceries);
-    setupItemTable(ui->tableFurniture);
-    setupItemTable(ui->tableCosmetics);
-    setupItemTable(ui->tableClothes);
-    setupItemTable(ui->tableSmoking);
-    setupItemTable(ui->tableLiquors);  // Added Liquors table setup
-
-    refreshAllItemTables();
-    refreshUsersTable();
+    refreshAllTables();
 }
+
 
 Admin_page::~Admin_page()
 {
     delete ui;
 }
 
-void Admin_page::loadItemsToTable(const QString &category, QTableWidget *table, const QString &search)
+// Setup User table headers
+void Admin_page::setupUserTable()
 {
-    if (!table) return;
+    ui->tableUsers->setColumnCount(4);
+    QStringList headers = {"Username", "Password", "Role", "Status"};
+    ui->tableUsers->setHorizontalHeaderLabels(headers);
+    ui->tableUsers->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+}
 
-    table->setRowCount(0);
+// Setup inventory tables headers for each category tab
+void Admin_page::setupInventoryTables()
+{
+    // Common headers for inventory tables
+    QStringList headers = {"ID", "Name", "Quantity", "Price (Rs)", "Category"};
 
-    const auto& items = inventory.getAllItems();
-    int row = 0;
+    auto setupTable = [&](QTableWidget* table) {
+        table->setColumnCount(5);
+        table->setHorizontalHeaderLabels(headers);
+        table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    };
 
-    for (const auto& item : items) {
-        QString itemCategory = QString::fromStdString(item.category);
-        if (itemCategory != category) continue;
+    setupTable(ui->tableElectronics);
+    setupTable(ui->tableGroceries);
+    setupTable(ui->tableFurniture);
+    setupTable(ui->tableCosmetics);
+    setupTable(ui->tableClothes);
+    setupTable(ui->tableSmoking);
+    setupTable(ui->tableLiquors);
+}
 
-        QString idStr = QString::number(item.id);
-        QString nameStr = QString::fromStdString(item.name);
+// Refresh all tables
+void Admin_page::refreshAllTables()
+{
+    populateUserTable();
+    populateInventoryTables();
+}
 
-        if (!search.isEmpty() &&
-            !nameStr.contains(search, Qt::CaseInsensitive) &&
-            idStr != search)
-            continue;
+// Populate User Table with all users
+void Admin_page::populateUserTable()
+{
+    ui->tableUsers->setRowCount(0);
+    const auto& users = userDataStore.getAllUsers();
 
-        table->insertRow(row);
-        table->setItem(row, 0, new QTableWidgetItem(idStr));
-        table->setItem(row, 1, new QTableWidgetItem(nameStr));
-        table->setItem(row, 2, new QTableWidgetItem(QString::number(item.quantity)));
-        table->setItem(row, 3, new QTableWidgetItem(QString("Rs %1").arg(item.price, 0, 'f', 2)));
-        ++row;
+    for (const auto& user : users)
+    {
+        int row = ui->tableUsers->rowCount();
+        ui->tableUsers->insertRow(row);
+
+        ui->tableUsers->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(user.username)));
+        ui->tableUsers->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(user.password)));
+        ui->tableUsers->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(user.role)));
+        ui->tableUsers->setItem(row, 3, new QTableWidgetItem(QString::fromStdString(user.status)));
     }
 }
 
-void Admin_page::refreshAllItemTables(const QString &search)
+// Populate inventory tables by category
+void Admin_page::populateInventoryTables()
 {
-    loadItemsToTable("Electronics", ui->tableElectronics, search);
-    loadItemsToTable("Groceries", ui->tableGroceries, search);
-    loadItemsToTable("Furniture", ui->tableFurniture, search);
-    loadItemsToTable("Cosmetics", ui->tableCosmetics, search);
-    loadItemsToTable("Clothes", ui->tableClothes, search);
-    loadItemsToTable("Smoking Products", ui->tableSmoking, search);
-    loadItemsToTable("Liquors", ui->tableLiquors, search);  // Refresh Liquors tab
-}
+    // Clear all tables first
+    ui->tableElectronics->setRowCount(0);
+    ui->tableGroceries->setRowCount(0);
+    ui->tableFurniture->setRowCount(0);
+    ui->tableCosmetics->setRowCount(0);
+    ui->tableClothes->setRowCount(0);
+    ui->tableSmoking->setRowCount(0);
+    ui->tableLiquors->setRowCount(0);
 
-void Admin_page::loadUsersToTable(const QString &search)
-{
-    QTableWidget *table = ui->tableUsers;
+    const auto& items = inventoryManager.getAllItems();
+    for (const auto& item : items)
+    {
+        QTableWidget* targetTable = nullptr;
+        QString category = QString::fromStdString(item.category).toLower();
 
-    table->setRowCount(0);
+        if (category == "electronics") targetTable = ui->tableElectronics;
+        else if (category == "groceries") targetTable = ui->tableGroceries;
+        else if (category == "furniture") targetTable = ui->tableFurniture;
+        else if (category == "cosmetics") targetTable = ui->tableCosmetics;
+        else if (category == "clothes") targetTable = ui->tableClothes;
+        else if (category == "smoking products") targetTable = ui->tableSmoking;
+        else if (category == "liquors") targetTable = ui->tableLiquors;
 
-    const auto& users = userData.getAllUsers();
-    int row = 0;
-
-    for (const auto& user : users) {
-        QString uname = QString::fromStdString(user.username);
-        if (search.isEmpty() || uname.contains(search, Qt::CaseInsensitive)) {
-            table->insertRow(row);
-            table->setItem(row, 0, new QTableWidgetItem(uname));
-            table->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(user.password)));
-            table->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(user.role)));
-            table->setItem(row, 3, new QTableWidgetItem(QString::fromStdString(user.status)));
-            ++row;
+        if (targetTable)
+        {
+            int row = targetTable->rowCount();
+            targetTable->insertRow(row);
+            targetTable->setItem(row, 0, new QTableWidgetItem(QString::number(item.id)));
+            targetTable->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(item.name)));
+            targetTable->setItem(row, 2, new QTableWidgetItem(QString::number(item.quantity)));
+            targetTable->setItem(row, 3, new QTableWidgetItem(QString("Rs %1").arg(item.price, 0, 'f', 2)));
+            targetTable->setItem(row, 4, new QTableWidgetItem(QString::fromStdString(item.category)));
         }
     }
 }
 
-void Admin_page::refreshUsersTable()
+// Search user by username and show result in user table (filtered)
+void Admin_page::onSearchUser()
 {
-    loadUsersToTable(ui->searchUserInput->text());
+    QString searchText = ui->searchUserInput->text().trimmed();
+    if (searchText.isEmpty())
+    {
+        QMessageBox::information(this, "Input Required", "Please enter a username to search.");
+        return;
+    }
+
+    ui->tableUsers->setRowCount(0);
+    const auto& users = userDataStore.getAllUsers();
+    for (const auto& user : users)
+    {
+        if (QString::fromStdString(user.username).contains(searchText, Qt::CaseInsensitive))
+        {
+            int row = ui->tableUsers->rowCount();
+            ui->tableUsers->insertRow(row);
+            ui->tableUsers->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(user.username)));
+            ui->tableUsers->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(user.password)));
+            ui->tableUsers->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(user.role)));
+            ui->tableUsers->setItem(row, 3, new QTableWidgetItem(QString::fromStdString(user.status)));
+        }
+    }
 }
 
-void Admin_page::on_addItemBtn_clicked()
+// Delete user by username (cannot delete admin)
+void Admin_page::onDeleteUser()
 {
-    int id = ui->idInput->text().toInt();
-    QString name = ui->nameInput->text();
-    int qty = ui->quantityInput->value();
+    QString username = ui->deleteUserInput->text().trimmed();
+    if (username.isEmpty())
+    {
+        QMessageBox::warning(this, "Input Required", "Please enter username to delete.");
+        return;
+    }
+
+    // Check user exists
+    if (!userDataStore.userExists(username.toStdString()))
+    {
+        QMessageBox::warning(this, "User Not Found", "No user found with that username.");
+        return;
+    }
+
+    // Prevent deleting admin users
+    std::string role = userDataStore.getUserRole(username.toStdString());
+    if (role == "admin")
+    {
+        QMessageBox::warning(this, "Action Denied", "Cannot delete an admin user.");
+        return;
+    }
+
+    bool success = userDataStore.deleteUser(username.toStdString());
+    if (success)
+    {
+        QMessageBox::information(this, "Success", "User deleted successfully.");
+        ui->deleteUserInput->clear();
+        populateUserTable();
+    }
+    else
+    {
+        QMessageBox::critical(this, "Failed", "Failed to delete user.");
+    }
+}
+
+// Add new item to inventory
+void Admin_page::onAddItem()
+{
+    bool okId;
+    int id = ui->idInput->text().toInt(&okId);
+    if (!okId || id <= 0)
+    {
+        QMessageBox::warning(this, "Invalid Input", "Please enter a valid positive integer ID.");
+        return;
+    }
+
+    QString name = ui->nameInput->text().trimmed();
+    if (name.isEmpty())
+    {
+        QMessageBox::warning(this, "Invalid Input", "Please enter item name.");
+        return;
+    }
+
+    int quantity = ui->quantityInput->value();
     double price = ui->priceInput->value();
     QString category = ui->categoryComboBox->currentText();
 
-    if (id <= 0 || name.isEmpty() || qty <= 0 || price <= 0.0) {
-        QMessageBox::warning(this, "Invalid Input", "Please fill all fields with valid data.");
+    InventoryItem item;
+    item.id = id;
+    item.name = name.toStdString();
+    item.quantity = quantity;
+    item.price = price;
+    item.category = category.toStdString();
+
+    inventoryManager.addItem(item);
+    QMessageBox::information(this, "Success", "Item added/updated successfully.");
+    clearAddItemInputs();
+    populateInventoryTables();
+}
+
+// Clear add item inputs after adding
+void Admin_page::clearAddItemInputs()
+{
+    ui->idInput->clear();
+    ui->nameInput->clear();
+    ui->quantityInput->setValue(0);
+    ui->priceInput->setValue(0.0);
+    ui->categoryComboBox->setCurrentIndex(0);
+}
+
+// Update existing item by ID or Name - set price directly and increase quantity
+void Admin_page::onUpdateItem()
+{
+    QString identifier = ui->updateIdOrNameInput->text().trimmed();
+    if (identifier.isEmpty())
+    {
+        QMessageBox::warning(this, "Input Required", "Please enter Item ID or Name to update.");
         return;
     }
 
-    if (inventory.hasItem(id)) {
-        QMessageBox::warning(this, "Duplicate ID", "An item with this ID already exists.");
+    bool okId;
+    int id = identifier.toInt(&okId);
+
+    double newPrice = ui->changePriceInput->value();
+    int quantityIncrease = ui->increaseQuantityInput->value();
+
+    if (newPrice == 0.0 && quantityIncrease == 0)
+    {
+        QMessageBox::information(this, "No Changes", "Please specify a new price or quantity to increase.");
         return;
     }
 
-    inventory.addItem({id, name.toStdString(), qty, price, category.toStdString()});
-    QMessageBox::information(this, "Success", "Item added successfully.");
-    refreshAllItemTables();
-}
+    // Try to find the item by ID or Name
+    InventoryItem item;
+    bool found = false;
+    if (okId)
+    {
+        found = inventoryManager.getItem(id, item);
+    }
+    else
+    {
+        // Search by name (case-insensitive)
+        const auto& items = inventoryManager.getAllItems();
+        for (const auto& i : items)
+        {
+            if (QString::fromStdString(i.name).compare(identifier, Qt::CaseInsensitive) == 0)
+            {
+                item = i;
+                found = true;
+                break;
+            }
+        }
+    }
 
-void Admin_page::on_removeItemBtn_clicked()
-{
-    int id = ui->removeIdInput->text().toInt();
-    if (id <= 0) {
-        QMessageBox::warning(this, "Invalid ID", "Please enter a valid item ID.");
+    if (!found)
+    {
+        QMessageBox::warning(this, "Not Found", "Item not found with given ID or Name.");
         return;
     }
 
-    if (inventory.removeItemById(id)) {
-        QMessageBox::information(this, "Removed", "Item removed successfully.");
-    } else {
-        QMessageBox::warning(this, "Error", "Item not found.");
-    }
+    // Update price and quantity
+    if (newPrice > 0.0)
+        item.price = newPrice; // set new price directly
+    if (quantityIncrease > 0)
+        item.quantity += quantityIncrease; // increase quantity
 
-    refreshAllItemTables();
+    inventoryManager.addItem(item); // addItem uses INSERT OR REPLACE
+    QMessageBox::information(this, "Success", "Item updated successfully.");
+    clearUpdateInputs();
+    populateInventoryTables();
 }
 
-void Admin_page::on_searchItemBtn_clicked()
+// Clear update inputs
+void Admin_page::clearUpdateInputs()
 {
-    QString searchTerm = ui->searchItemInput->text();
-    refreshAllItemTables(searchTerm);
+    ui->updateIdOrNameInput->clear();
+    ui->changePriceInput->setValue(0.0);
+    ui->increaseQuantityInput->setValue(0);
 }
 
-void Admin_page::on_searchUserBtn_clicked()
-{
-    refreshUsersTable();
-}
+// Update existing item by ID or Name - set price directly and increase quantity
 
-void Admin_page::on_deleteUserBtn_clicked()
-{
-    QString username = ui->deleteUserInput->text();
 
-    if (username.isEmpty()) {
-        QMessageBox::warning(this, "Missing Input", "Enter a username to delete.");
+// Add description to an existing item by ID
+void Admin_page::onAddDescription()
+{
+    bool ok;
+    int id = ui->descItemIdInput->text().toInt(&ok);  // ✅ Fixed name from descIdInput
+    if (!ok || id <= 0) {
+        QMessageBox::warning(this, "Invalid Input", "Please enter a valid Item ID.");
         return;
     }
 
-    if (userData.deleteUser(username.toStdString())) {
-        QMessageBox::information(this, "Success", "User deleted successfully.");
-    } else {
-        QMessageBox::warning(this, "Failed", "User not found or is an admin.");
+    QString description = ui->descInput->toPlainText().trimmed();  // ✅ Use toPlainText for QTextEdit
+    if (description.isEmpty()) {
+        QMessageBox::warning(this, "Invalid Input", "Description cannot be empty.");
+        return;
     }
 
-    refreshUsersTable();
+    InventoryItem item;
+    if (!inventoryManager.getItem(id, item)) {
+        QMessageBox::warning(this, "Not Found", "No item found with that ID.");
+        return;
+    }
+
+    item.description = description.toStdString();  // ✅ description field must exist in InventoryItem
+    inventoryManager.addItem(item);  // replace item
+
+    QMessageBox::information(this, "Success", "Description updated successfully.");
+
+    ui->descItemIdInput->clear();  // ✅ clear ID input
+    ui->descInput->clear();        // ✅ clear QTextEdit
+
+    populateInventoryTables();
 }
 
-void Admin_page::on_refreshBtn_clicked()
+
+void Admin_page::onSearchItem()
 {
-    refreshAllItemTables();
-    refreshUsersTable();
+    QString searchText = ui->searchItemInput->text().trimmed();
+    if (searchText.isEmpty())
+    {
+        QMessageBox::information(this, "Input Required", "Please enter ID or Name to search.");
+        return;
+    }
+
+    bool okId;
+    int id = searchText.toInt(&okId);
+
+    ui->tableElectronics->setRowCount(0);
+    ui->tableGroceries->setRowCount(0);
+    ui->tableFurniture->setRowCount(0);
+    ui->tableCosmetics->setRowCount(0);
+    ui->tableClothes->setRowCount(0);
+    ui->tableSmoking->setRowCount(0);
+    ui->tableLiquors->setRowCount(0);
+
+    const auto& items = inventoryManager.getAllItems();
+    for (const auto& item : items)
+    {
+        bool matches = false;
+        if (okId)
+            matches = (item.id == id);
+        else
+            matches = (QString::fromStdString(item.name).contains(searchText, Qt::CaseInsensitive));
+
+        if (matches)
+        {
+            QTableWidget* targetTable = nullptr;
+            QString category = QString::fromStdString(item.category).toLower();
+
+            if (category == "electronics") targetTable = ui->tableElectronics;
+            else if (category == "groceries") targetTable = ui->tableGroceries;
+            else if (category == "furniture") targetTable = ui->tableFurniture;
+            else if (category == "cosmetics") targetTable = ui->tableCosmetics;
+            else if (category == "clothes") targetTable = ui->tableClothes;
+            else if (category == "smoking products") targetTable = ui->tableSmoking;
+            else if (category == "liquors") targetTable = ui->tableLiquors;
+
+            if (targetTable)
+            {
+                int row = targetTable->rowCount();
+                targetTable->insertRow(row);
+                targetTable->setItem(row, 0, new QTableWidgetItem(QString::number(item.id)));
+                targetTable->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(item.name)));
+                targetTable->setItem(row, 2, new QTableWidgetItem(QString::number(item.quantity)));
+                targetTable->setItem(row, 3, new QTableWidgetItem(QString("Rs %1").arg(item.price, 0, 'f', 2)));
+                targetTable->setItem(row, 4, new QTableWidgetItem(QString::fromStdString(item.category)));
+            }
+        }
+    }
 }
 
-void Admin_page::on_logoutBtn_clicked()
+// Remove inventory item by ID
+void Admin_page::onRemoveItem()
 {
-    emit logoutRequested();
+    bool okId;
+    int id = ui->removeIdInput->text().toInt(&okId);
+    if (!okId || id <= 0)
+    {
+        QMessageBox::warning(this, "Invalid Input", "Please enter a valid item ID to remove.");
+        return;
+    }
+
+    bool success = inventoryManager.removeItemById(id);
+    if (success)
+    {
+        QMessageBox::information(this, "Success", "Item removed successfully.");
+        ui->removeIdInput->clear();
+        populateInventoryTables();
+    }
+    else
+    {
+        QMessageBox::critical(this, "Failed", "Failed to remove item. Item ID may not exist.");
+    }
 }

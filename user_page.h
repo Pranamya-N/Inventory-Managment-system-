@@ -48,6 +48,9 @@ private:
     void showSettingsDialog();
     int getTotalPurchases() const;
 
+    // New helper to setup table columns with Description included
+    void setupTableColumns(QTableWidget* table);
+
 signals:
     void logoutRequested();
     void checkoutRequested();

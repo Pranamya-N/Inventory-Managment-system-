@@ -127,13 +127,95 @@
            <item><property name="text"><string>Cosmetics</string></property></item>
            <item><property name="text"><string>Clothes</string></property></item>
            <item><property name="text"><string>Smoking Products</string></property></item>
-           <item><property name="text"><string>Liquors</string></property></item>  <!-- Added Liquors here -->
+           <item><property name="text"><string>Liquors</string></property></item>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="addItemBtn">
            <property name="text">
             <string>Add Item</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+
+       <!-- Update Item Layout -->
+       <item>
+        <layout class="QHBoxLayout" name="updateItemLayout">
+         <property name="spacing">
+          <number>10</number>
+         </property>
+         <item>
+          <widget class="QLineEdit" name="updateIdOrNameInput">
+           <property name="placeholderText">
+            <string>Enter Item ID or Name to Update</string>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="changePriceInput">
+           <property name="minimum">
+            <double>0.00</double>
+           </property>
+           <property name="maximum">
+            <double>1000000.00</double>
+           </property>
+           <property name="decimals">
+            <number>2</number>
+           </property>
+           <property name="prefix">
+            <string>Rs </string>
+           </property>
+           <property name="toolTip">
+            <string>Set new price</string>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="increaseQuantityInput">
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>9999</number>
+           </property>
+           <property name="prefix">
+            <string>Increase Qty </string>
+           </property>
+           <property name="toolTip">
+            <string>Amount to increase quantity by</string>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="updateItemBtn">
+           <property name="text">
+            <string>Update Item</string>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>0</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -320,6 +402,48 @@
          </widget>
 
         </widget>
+       </item>
+
+       <!-- Add Description Layout -->
+       <item>
+        <layout class="QHBoxLayout" name="addDescriptionLayout">
+         <item>
+          <widget class="QLineEdit" name="descItemIdInput">
+           <property name="placeholderText">
+            <string>Enter Item ID</string>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTextEdit" name="descInput">
+           <property name="minimumSize">
+            <size>
+             <width>300</width>
+             <height>50</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="addDescriptionBtn">
+           <property name="text">
+            <string>Add Description</string>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
 
        <!-- Remove Item Layout -->
