@@ -1,6 +1,6 @@
 #ifndef ADMIN_PAGE_H
 #define ADMIN_PAGE_H
-
+#include "mainwindow.h"
 #include <QWidget>
 #include <QTableWidget>
 #include "backend_classes.h"
@@ -14,7 +14,8 @@ class Admin_page : public QWidget
     Q_OBJECT
 
 public:
-    explicit Admin_page(InventoryManager& inventoryRef, UserDataStore& userDataRef, QWidget *parent = nullptr);
+    Admin_page(InventoryManager& inventoryRef, UserDataStore& userDataRef, QWidget* parent = nullptr);
+
     ~Admin_page();
 
 signals:

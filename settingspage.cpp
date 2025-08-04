@@ -1,25 +1,49 @@
 #include "settingspage.h"
 #include "ui_settingspage.h"
-#include <QMessageBox>
 
-SettingsPage::SettingsPage(const QString& username, const QString& password, const QVector<QPair<QString, double>>& history, QWidget *parent)
-    : QDialog(parent),
+#include <QPushButton>
+#include <QLineEdit>
+#include <QCheckBox>
+#include <QStackedWidget>
+#include <QTableWidget>
+#include <QHeaderView>
+#include <QTableWidgetItem>
+#include <QAbstractItemView>
+#include <QMessageBox>
+#include <QVBoxLayout>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QDebug>
+
+SettingsPage::SettingsPage(const QString& username, QWidget *parent) :
+    QDialog(parent),
     ui(new Ui::SettingsPage),
-    currentUsername(username),
-    currentPassword(password),
-    purchaseHistory(history)
+    username(username)
 {
     ui->setupUi(this);
-    ui->labelUsername->setText(currentUsername);
 
-    ui->lineEditCurrentPassword->setEchoMode(QLineEdit::Password);
-    ui->lineEditNewPassword->setEchoMode(QLineEdit::Password);
-    ui->lineEditConfirmPassword->setEchoMode(QLineEdit::Password);
+    ui->labelUsername->setText("Username: " + username);
 
-    connect(ui->checkBoxShowPasswords, &QCheckBox::toggled, this, &SettingsPage::on_checkBoxShowPasswords_toggled);
-    connect(ui->pushButtonChangePassword, &QPushButton::clicked, this, &SettingsPage::on_pushButtonChangePassword_clicked);
-    connect(ui->pushButtonViewHistory, &QPushButton::clicked, this, &SettingsPage::on_pushButtonViewHistory_clicked);
-    connect(ui->pushButtonBack, &QPushButton::clicked, this, &SettingsPage::on_pushButtonBack_clicked);
+    // Adjust vertical spacing of layouts to 5
+    if (QVBoxLayout* menuLayout = qobject_cast<QVBoxLayout*>(ui->pageMenu->layout())) {
+        menuLayout->setSpacing(5);
+    }
+
+    if (QVBoxLayout* passwordLayout = qobject_cast<QVBoxLayout*>(ui->pageChangePassword->layout())) {
+        passwordLayout->setSpacing(5);
+    }
+
+    if (QVBoxLayout* historyLayout = qobject_cast<QVBoxLayout*>(ui->pagePurchaseHistory->layout())) {
+        historyLayout->setSpacing(5);
+    }
+
+    // Connect buttons with slots
+    connect(ui->btnChangePassword, &QPushButton::clicked, this, &SettingsPage::onChangePasswordClicked);
+    connect(ui->btnViewHistory, &QPushButton::clicked, this, &SettingsPage::onViewPurchaseHistoryClicked);
+    connect(ui->btnBackPassword, &QPushButton::clicked, this, &SettingsPage::onBackToMenuFromPassword);
+    connect(ui->btnBackHistory, &QPushButton::clicked, this, &SettingsPage::onBackToMenuFromHistory);
+    connect(ui->btnSubmitPassword, &QPushButton::clicked, this, &SettingsPage::onSubmitPasswordChange);
+    connect(ui->checkShowPassword, &QCheckBox::toggled, this, &SettingsPage::onShowPasswordToggled);
 }
 
 SettingsPage::~SettingsPage()
@@ -27,71 +51,135 @@ SettingsPage::~SettingsPage()
     delete ui;
 }
 
-void SettingsPage::setUsername(const QString& username)
+void SettingsPage::onChangePasswordClicked()
 {
-    currentUsername = username;
-    ui->labelUsername->setText(currentUsername);
+    ui->lineOldPassword->clear();
+    ui->lineNewPassword->clear();
+    ui->lineConfirmPassword->clear();
+    ui->checkShowPassword->setChecked(false);
+    ui->stackedWidget->setCurrentWidget(ui->pageChangePassword);
 }
 
-void SettingsPage::clearPasswordFields()
+void SettingsPage::onViewPurchaseHistoryClicked()
 {
-    ui->lineEditCurrentPassword->clear();
-    ui->lineEditNewPassword->clear();
-    ui->lineEditConfirmPassword->clear();
+    qDebug() << "View Purchase History clicked for user:" << username;
+    populatePurchaseHistoryTable();
+    ui->stackedWidget->setCurrentWidget(ui->pagePurchaseHistory);
 }
 
-void SettingsPage::on_checkBoxShowPasswords_toggled(bool checked)
+void SettingsPage::onBackToMenuFromPassword()
 {
-    QLineEdit::EchoMode mode = checked ? QLineEdit::Normal : QLineEdit::Password;
-    ui->lineEditCurrentPassword->setEchoMode(mode);
-    ui->lineEditNewPassword->setEchoMode(mode);
-    ui->lineEditConfirmPassword->setEchoMode(mode);
+    ui->stackedWidget->setCurrentWidget(ui->pageMenu);
 }
 
-void SettingsPage::on_pushButtonChangePassword_clicked()
+void SettingsPage::onBackToMenuFromHistory()
 {
-    QString currentPassInput = ui->lineEditCurrentPassword->text();
-    QString newPass = ui->lineEditNewPassword->text();
-    QString confirmPass = ui->lineEditConfirmPassword->text();
+    ui->stackedWidget->setCurrentWidget(ui->pageMenu);
+}
 
-    if (currentPassInput != currentPassword) {
-        QMessageBox::warning(this, "Error", "Current password is incorrect.");
-        return;
-    }
+void SettingsPage::onSubmitPasswordChange()
+{
+    QString oldPass = ui->lineOldPassword->text();
+    QString newPass = ui->lineNewPassword->text();
+    QString confirmPass = ui->lineConfirmPassword->text();
 
-    if (newPass.isEmpty() || confirmPass.isEmpty()) {
-        QMessageBox::warning(this, "Error", "Please enter and confirm the new password.");
+    if (oldPass.isEmpty() || newPass.isEmpty() || confirmPass.isEmpty()) {
+        QMessageBox::warning(this, "Input Error", "Please fill all password fields.");
         return;
     }
 
     if (newPass != confirmPass) {
-        QMessageBox::warning(this, "Mismatch", "New password and confirmation do not match.");
+        QMessageBox::warning(this, "Input Error", "New password and confirm password do not match.");
         return;
     }
 
-    emit changePasswordRequested(currentPassInput, newPass);
-    QMessageBox::information(this, "Success", "Password changed successfully.");
-    clearPasswordFields();
-}
-
-void SettingsPage::on_pushButtonBack_clicked()
-{
-    this->close();
-}
-
-void SettingsPage::on_pushButtonViewHistory_clicked()
-{
-    populatePurchaseHistory();
-}
-
-void SettingsPage::populatePurchaseHistory()
-{
-    QString historyText = "Purchase History:\n\n";
-    double total = 0.0;
-    for (const auto& item : purchaseHistory) {
-        historyText += QString("- %1 : ₹%2\n").arg(item.first).arg(item.second, 0, 'f', 2);
-        total += item.second;
+    QSqlQuery query;
+    query.prepare("SELECT password FROM users WHERE username = ?");
+    query.addBindValue(username);
+    if (!query.exec() || !query.next()) {
+        QMessageBox::warning(this, "Error", "Failed to access user data.");
+        return;
     }
-    historyText += QString("\nTotal: ₹%1").arg(total, 0, 'f', 2);
-    QMessageBox::information(this, "Purchase History", historyText);
+
+    QString currentPassword = query.value(0).toString();
+    if (currentPassword != oldPass) {
+        QMessageBox::warning(this, "Error", "Old password is incorrect.");
+        return;
+    }
+
+    QSqlQuery updateQuery;
+    updateQuery.prepare("UPDATE users SET password = ? WHERE username = ?");
+    updateQuery.addBindValue(newPass);
+    updateQuery.addBindValue(username);
+
+    if (!updateQuery.exec()) {
+        QMessageBox::warning(this, "Error", "Failed to update password.");
+        return;
+    }
+
+    QMessageBox::information(this, "Success", "Password updated successfully.");
+    ui->stackedWidget->setCurrentWidget(ui->pageMenu);
+}
+
+void SettingsPage::onShowPasswordToggled(bool checked)
+{
+    QLineEdit::EchoMode mode = checked ? QLineEdit::Normal : QLineEdit::Password;
+    ui->lineOldPassword->setEchoMode(mode);
+    ui->lineNewPassword->setEchoMode(mode);
+    ui->lineConfirmPassword->setEchoMode(mode);
+}
+
+void SettingsPage::setPurchaseHistory(const std::vector<PurchaseRecord>& purchases)
+{
+    purchaseHistory = purchases;
+    if (ui->stackedWidget->currentWidget() == ui->pagePurchaseHistory) {
+        populatePurchaseHistoryTable();
+    }
+}
+
+void SettingsPage::populatePurchaseHistoryTable() {
+    QSqlQuery q;
+    q.prepare(R"(
+        SELECT i.name, o.quantity, (i.price * o.quantity) as total, o.order_date
+        FROM orders o
+        JOIN inventory i ON o.itemId = i.id
+        WHERE o.username = ? AND o.status = 'completed'
+        ORDER BY o.order_date DESC
+    )");
+    q.addBindValue(username);
+    if (!q.exec()) {
+        QMessageBox::warning(this, "Error", "Failed to load purchase history.");
+        qDebug() << "SQL Error:" << q.lastError().text();
+        return;
+    }
+
+    int count = 0;
+    while (q.next()) {
+        ++count;
+        PurchaseRecord rec;
+        rec.productName = q.value(0).toString();
+        rec.quantity = q.value(1).toInt();
+        rec.amount = q.value(2).toDouble();
+        purchaseHistory.push_back(rec);
+    }
+    qDebug() << "Purchase history records found:" << count;
+
+    ui->tablePurchaseHistory->clearContents();
+    ui->tablePurchaseHistory->setRowCount(static_cast<int>(purchaseHistory.size()));
+    ui->tablePurchaseHistory->setColumnCount(3);
+    ui->tablePurchaseHistory->setHorizontalHeaderLabels(QStringList() << "Product" << "Quantity" << "Amount (Rs.)");
+
+    ui->tablePurchaseHistory->horizontalHeader()->setStretchLastSection(true);
+    ui->tablePurchaseHistory->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tablePurchaseHistory->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tablePurchaseHistory->setSelectionMode(QAbstractItemView::NoSelection);
+
+    for (int i = 0; i < static_cast<int>(purchaseHistory.size()); ++i) {
+        const PurchaseRecord& rec = purchaseHistory[i];
+        ui->tablePurchaseHistory->setItem(i, 0, new QTableWidgetItem(rec.productName));
+        ui->tablePurchaseHistory->setItem(i, 1, new QTableWidgetItem(QString::number(rec.quantity)));
+        ui->tablePurchaseHistory->setItem(i, 2, new QTableWidgetItem(QString::number(rec.amount, 'f', 2)));
+    }
+
+    ui->tablePurchaseHistory->resizeColumnsToContents();
 }

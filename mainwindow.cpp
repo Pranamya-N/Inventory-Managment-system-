@@ -1,9 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
 #include <QVBoxLayout>
 #include <QLayoutItem>
 #include <QMessageBox>
+#include <QDebug>
+#include "user_page.h"
 #include "admin_page.h"
 #include "checkout_page.h"
 
@@ -145,49 +146,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->setCurrentIndex(0);
     ui->userPageContainer->setVisible(false);
 
-    // --- Demo Inventory Items ---
-    inventory.addItem({101, "Wireless Mouse", 25, 19.99, "Electronics"});
-    inventory.addItem({102, "Bluetooth Keyboard", 15, 45.50, "Electronics"});
-    inventory.addItem({103, "USB-C Monitor", 8, 150.00, "Electronics"});
+    // Add default admin user if not exists
+    if (!userData.userExists("admin")) {
+        userData.addUser("admin", "admin123", "admin");
+    }
 
-    inventory.addItem({201, "Bananas", 100, 0.50, "Groceries"});
-    inventory.addItem({202, "Organic Apples", 80, 1.20, "Groceries"});
-    inventory.addItem({203, "Whole Wheat Bread", 60, 1.50, "Groceries"});
-
-    inventory.addItem({301, "Modern Sofa", 5, 450.00, "Furniture"});
-    inventory.addItem({302, "Dining Table", 3, 350.00, "Furniture"});
-    inventory.addItem({303, "Office Chair", 10, 120.00, "Furniture"});
-
-    inventory.addItem({401, "Red Lipstick", 30, 14.99, "Cosmetics"});
-    inventory.addItem({402, "Eyeliner", 25, 9.99, "Cosmetics"});
-    inventory.addItem({403, "Moisturizer Cream", 40, 18.50, "Cosmetics"});
-
-    inventory.addItem({501, "Cotton T-Shirt", 50, 12.99, "Clothes"});
-    inventory.addItem({502, "Jeans Pants", 40, 25.00, "Clothes"});
-    inventory.addItem({503, "Leather Jacket", 15, 75.00, "Clothes"});
-
-    inventory.addItem({601, "Cigarettes Pack", 120, 5.00, "Smoking Products"});
-    inventory.addItem({602, "Hookah Set", 8, 60.00, "Smoking Products"});
-    inventory.addItem({603, "Vape Pen", 20, 35.00, "Smoking Products"});
-
-    inventory.addItem({701, "Red Wine", 50, 1200.00, "Liquors"});
-    inventory.addItem({702, "Whiskey", 30, 2500.00, "Liquors"});
-    inventory.addItem({703, "Vodka", 40, 1800.00, "Liquors"});
-    inventory.addItem({704, "Beer Pack", 100, 900.00, "Liquors"});
-    inventory.addItem({705, "Gin", 25, 2200.00, "Liquors"});
-
-    // --- Demo Users ---
-    userData.addUser("Pranamya Niroula", "niroula", "user");
-    userData.addUser("Aaditya Thakuri", "thakuri", "user");
-    userData.addUser("Aayush Timalsina", "timalsina", "user");
-    userData.addUser("Santosh Tolange", "tolange", "user");
-    userData.addUser("Pranish Shrestha", "shrestha", "user");
-
-    // Connect Show Password checkbox
     connect(ui->showPasswordCheckbox, &QCheckBox::toggled, this, &MainWindow::on_showPasswordCheckbox_toggled);
-
-    // Connect signal from user page to show checkout page
-    connect(this, &MainWindow::checkoutRequested, this, &MainWindow::showCheckoutPage);
+    connect(this, &MainWindow::checkoutRequested, this, &MainWindow::showCheckoutPage, Qt::UniqueConnection);
 }
 
 MainWindow::~MainWindow()
@@ -197,6 +162,8 @@ MainWindow::~MainWindow()
     if (adminPageWidget) delete adminPageWidget;
     if (checkoutPage) delete checkoutPage;
 }
+
+// ... [rest of the code remains the same] ...
 
 void MainWindow::resetLoginUI()
 {
@@ -274,6 +241,9 @@ void MainWindow::on_loginBtn_clicked()
     QString id = ui->idInput->text();
     QString password = ui->passwordInput->text();
 
+    std::string idStd = id.toStdString();
+    std::string passStd = password.toStdString();
+
     if (selectedRole == "admin") {
         if (id == "admin" && password == "admin123") {
             if (adminPageWidget) {
@@ -300,7 +270,7 @@ void MainWindow::on_loginBtn_clicked()
         }
 
     } else if (selectedRole == "user") {
-        if (userData.isValidUser(id.toStdString(), password.toStdString())) {
+        if (userData.isValidUser(idStd, passStd)) {
             if (userPageWidget) {
                 delete userPageWidget;
                 userPageWidget = nullptr;
@@ -345,14 +315,13 @@ void MainWindow::on_loginBtn_clicked()
                 resetLoginUI();
             });
 
-            connect(userPageWidget, &User_page::checkoutRequested, this, &MainWindow::showCheckoutPage);
+            connect(userPageWidget, &User_page::checkoutRequested, this, &MainWindow::showCheckoutPage, Qt::UniqueConnection);
 
         } else {
             ui->messageLabel->setText("Invalid User ID or Password");
         }
     }
 }
-
 
 void MainWindow::on_registerBtn_clicked()
 {
@@ -364,12 +333,17 @@ void MainWindow::on_registerBtn_clicked()
         return;
     }
 
-    if (userData.userExists(id.toStdString())) {
+    std::string idStd = id.toStdString();
+
+    if (userData.userExists(idStd)) {
         ui->messageLabel->setText("User ID already exists");
         return;
     }
 
-    userData.addUser(id.toStdString(), password.toStdString(), "user");
+    std::string passStd = password.toStdString();
+
+    userData.addUser(idStd, passStd, "user");
+
     ui->messageLabel->setText("Registration successful! Please log in.");
 
     ui->idInput->clear();
@@ -389,7 +363,6 @@ void MainWindow::showCheckoutPage()
 {
     QString username;
 
-    // ✅ Safely retrieve username before cleanup
     if (userPageWidget) {
         username = userPageWidget->getUsername();
     }
@@ -400,14 +373,12 @@ void MainWindow::showCheckoutPage()
         return;
     }
 
-    // ✅ Cleanup previous CheckoutPage if it exists
     if (checkoutPage) {
         ui->stackedWidget->removeWidget(checkoutPage);
         checkoutPage->deleteLater();
         checkoutPage = nullptr;
     }
 
-    // ✅ Remove old UserPage widget from layout & memory
     if (userPageWidget) {
         QLayout* layout = ui->userPageContainer->layout();
         if (layout) {
@@ -425,12 +396,10 @@ void MainWindow::showCheckoutPage()
         userPageWidget = nullptr;
     }
 
-    // ✅ Create new CheckoutPage
     checkoutPage = new CheckoutPage(username, orderManager, inventory, this);
     ui->stackedWidget->addWidget(checkoutPage);
     ui->stackedWidget->setCurrentWidget(checkoutPage);
 
-    // ✅ Connect backToUserPage signal
     connect(checkoutPage, &CheckoutPage::backToUserPage, this, [this, username]() {
         if (checkoutPage) {
             ui->stackedWidget->removeWidget(checkoutPage);
@@ -438,7 +407,6 @@ void MainWindow::showCheckoutPage()
             checkoutPage = nullptr;
         }
 
-        // Create and show user page again
         userPageWidget = new User_page(username, inventory, orderManager, ui->userPageContainer);
         QVBoxLayout* layout = new QVBoxLayout(ui->userPageContainer);
         layout->addWidget(userPageWidget);
@@ -467,7 +435,7 @@ void MainWindow::showCheckoutPage()
             resetLoginUI();
         });
 
-        connect(userPageWidget, &User_page::checkoutRequested, this, &MainWindow::showCheckoutPage);
+        connect(userPageWidget, &User_page::checkoutRequested, this, &MainWindow::showCheckoutPage, Qt::UniqueConnection);
     });
 
     connect(checkoutPage, &CheckoutPage::logoutRequested, this, [this]() {

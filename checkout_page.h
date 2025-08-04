@@ -30,7 +30,6 @@ private slots:
     void on_confirmOrderButton_clicked();
     void on_billBackButton_clicked();
     void on_confirmPaymentButton_clicked();
-    void on_logoutButton_clicked();
 
 private:
     Ui::CheckoutPage *ui;

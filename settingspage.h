@@ -2,9 +2,8 @@
 #define SETTINGSPAGE_H
 
 #include <QDialog>
-#include <QString>
-#include <QVector>
-#include <QPair>
+#include <vector>
+#include "backend_classes.h"  // ✅ Include for PurchaseRecord
 
 namespace Ui {
 class SettingsPage;
@@ -15,27 +14,26 @@ class SettingsPage : public QDialog
     Q_OBJECT
 
 public:
-    explicit SettingsPage(const QString& username, const QString& password, const QVector<QPair<QString, double>>& history, QWidget *parent = nullptr);
+    explicit SettingsPage(const QString& username, QWidget *parent = nullptr);
     ~SettingsPage();
-    void setUsername(const QString& username);
 
-signals:
-    void changePasswordRequested(const QString& currentPassword, const QString& newPassword);
+    void setPurchaseHistory(const std::vector<PurchaseRecord>& purchases);
 
 private slots:
-    void on_pushButtonChangePassword_clicked();
-    void on_pushButtonBack_clicked();
-    void on_checkBoxShowPasswords_toggled(bool checked);
-    void on_pushButtonViewHistory_clicked();
+    void onChangePasswordClicked();
+    void onViewPurchaseHistoryClicked();
+    void onBackToMenuFromPassword();
+    void onBackToMenuFromHistory();
+    void onSubmitPasswordChange();
+    void onShowPasswordToggled(bool checked);
 
 private:
     Ui::SettingsPage *ui;
-    QString currentUsername;
-    QString currentPassword;
-    QVector<QPair<QString, double>> purchaseHistory;
+    QString username;
 
-    void clearPasswordFields();
-    void populatePurchaseHistory();
+    std::vector<PurchaseRecord> purchaseHistory;
+
+    void populatePurchaseHistoryTable();
 };
 
 #endif // SETTINGSPAGE_H

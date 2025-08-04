@@ -7,109 +7,137 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>420</height>
+    <height>350</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Settings</string>
-  </property>
-  <layout class="QVBoxLayout" name="verticalLayoutMain">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QFormLayout" name="formLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="labelUsernameTitle">
-       <property name="text">
-        <string>Username:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="labelUsername">
-       <property name="text">
-        <string>username_here</string>
-       </property>
-      </widget>
-     </item>
-
-     <item row="1" column="0">
-      <widget class="QLabel" name="labelCurrentPasswordTitle">
-       <property name="text">
-        <string>Current Password:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="lineEditCurrentPassword">
-       <property name="echoMode">
-        <enum>QLineEdit::Password</enum>
-       </property>
-      </widget>
-     </item>
-
-     <item row="2" column="0">
-      <widget class="QLabel" name="labelNewPasswordTitle">
-       <property name="text">
-        <string>New Password:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="lineEditNewPassword">
-       <property name="echoMode">
-        <enum>QLineEdit::Password</enum>
-       </property>
-      </widget>
-     </item>
-
-     <item row="3" column="0">
-      <widget class="QLabel" name="labelConfirmPasswordTitle">
-       <property name="text">
-        <string>Confirm Password:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="lineEditConfirmPassword">
-       <property name="echoMode">
-        <enum>QLineEdit::Password</enum>
-       </property>
-      </widget>
-     </item>
-
-     <item row="4" column="0" colspan="2">
-      <widget class="QCheckBox" name="checkBoxShowPasswords">
-       <property name="text">
-        <string>Show Passwords</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-
-   <item>
-    <widget class="QPushButton" name="pushButtonChangePassword">
+    <widget class="QLabel" name="labelUsername">
      <property name="text">
-      <string>Change Password</string>
+      <string>Username: user123</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
     </widget>
    </item>
-
    <item>
-    <widget class="QPushButton" name="pushButtonViewHistory">
-     <property name="text">
-      <string>View Purchase History</string>
+    <widget class="QStackedWidget" name="stackedWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
+     <widget class="QWidget" name="pageMenu">
+      <layout class="QVBoxLayout" name="menuLayout">
+       <item>
+        <widget class="QPushButton" name="btnChangePassword">
+         <property name="text">
+          <string>Change Password</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnViewHistory">
+         <property name="text">
+          <string>View Purchase History</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="pageChangePassword">
+      <layout class="QVBoxLayout" name="passwordLayout">
+       <item>
+        <widget class="QLabel" name="labelOldPassword">
+         <property name="text">
+          <string>Old Password:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineOldPassword">
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelNewPassword">
+         <property name="text">
+          <string>New Password:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineNewPassword">
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelConfirmPassword">
+         <property name="text">
+          <string>Confirm Password:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineConfirmPassword">
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkShowPassword">
+         <property name="text">
+          <string>Show Passwords</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="passwordButtonsLayout">
+         <item>
+          <widget class="QPushButton" name="btnBackPassword">
+           <property name="text">
+            <string>Back</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnSubmitPassword">
+           <property name="text">
+            <string>Submit</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="pagePurchaseHistory">
+      <layout class="QVBoxLayout" name="historyLayout">
+       <item>
+        <widget class="QTableWidget" name="tablePurchaseHistory"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnBackHistory">
+         <property name="text">
+          <string>Back</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
-
-   <item>
-    <widget class="QPushButton" name="pushButtonBack">
-     <property name="text">
-      <string>Back</string>
-     </property>
-    </widget>
-   </item>
-
   </layout>
  </widget>
  <resources/>

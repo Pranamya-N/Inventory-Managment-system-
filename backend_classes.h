@@ -1,97 +1,114 @@
+
+
 #ifndef BACKEND_CLASSES_H
 #define BACKEND_CLASSES_H
 
 #include <string>
 #include <vector>
-#include <iostream>
+#include <QString>
 
-using namespace std;
+// Forward declarations
+class InventoryManager;
 
-// ------------------ UserRecord ------------------
 struct UserRecord {
-    string username;
-    string password;
-    string role;
-    string status;
+    std::string username;
+    std::string password;
+    std::string role;
+    std::string status;
 };
 
-// ------------------ InventoryItem ------------------
 struct InventoryItem {
     int id;
-    string name;
+    std::string name;
     int quantity;
     double price;
-    string category;
+    std::string category;
 
     void display() const;
 };
 
-// ------------------ UserDataStore ------------------
-class UserDataStore {
-    vector<UserRecord> users;
-
-public:
-    void addUser(const string& username, const string& password, const string& role);
-    bool isValidUser(const string& username, const string& password);
-    string getUserRole(const string& username);
-    bool userExists(const string& username);
-    const vector<UserRecord>& getAllUsers() const;
-    bool deleteUser(const string& username);
+struct Order {
+    int orderId;
+    int itemId;
+    int quantity;
+    std::string status;
+    std::string order_date;
 };
 
-// ------------------ InventoryManager ------------------
-class InventoryManager {
-    vector<InventoryItem> items;
+struct CartItem {
+    int itemId;
+    std::string itemName;
+    int quantity;
+    double price;
+};
 
+struct PurchaseRecord {
+    QString productName;
+    int quantity;
+    double amount;
+};
+
+class UserDataStore {
+public:
+    void addUser(const std::string& username, const std::string& password, const std::string& role);
+    bool isValidUser(const std::string& username, const std::string& password);
+    std::string getUserRole(const std::string& username);
+    bool userExists(const std::string& username);
+    const std::vector<UserRecord>& getAllUsers() const;
+    bool deleteUser(const std::string& username);
+};
+
+class InventoryManager {
 public:
     void addItem(const InventoryItem& item);
     void showItems() const;
     bool getItem(int id, InventoryItem& resultItem) const;
     bool removeItemById(int id);
     void updateItemQuantity(int id, int newQuantity);
-    const vector<InventoryItem>& getAllItems() const;
+    void setItemQuantity(int id, int newQuantity);
+    int getItemQuantity(int id) const;
+    const std::vector<InventoryItem>& getAllItems() const;
     double getPrice(int id) const;
-    string getItemName(int id) const;
+    std::string getItemName(int id) const;
     bool hasItem(int id) const;
+    bool decreaseQuantity(int itemId, int amount);
+
 };
 
-// ------------------ Order ------------------
-struct Order {
-    int orderId;
-    string username;
-    int itemId;
-    int quantity;
-    string status;
-};
-
-// ------------------ OrderManager ------------------
 class OrderManager {
-    vector<Order> orders;
-    int nextOrderId;
-
 public:
     OrderManager();
-    bool placeOrder(const string& username, InventoryManager& inventory, int itemId, int quantity);
-    vector<Order> getUserOrders(const string& username) const;
-    bool removeOrder(const string& username, int itemId);
-    bool decreaseOrderQuantity(const string& username, int itemId);
 
-    // Added method to clear all orders for a user
-    void clearUserOrders(const string& username);
+    // Cart management
+    bool addToCart(const std::string& username, int itemId, int quantity);
+    std::vector<CartItem> getCartItems(const std::string& username) const;
+    bool removeFromCart(const std::string& username, int itemId);
+
+    // Order processing (two versions)
+    bool placeOrder(const std::string& username, InventoryManager& inventory);  // For entire cart
+    bool placeOrder(const std::string& username, InventoryManager& inventory, int itemId, int quantity);  // For single item
+
+    // Order management
+    std::vector<Order> getCompletedOrders(const std::string& username) const;
+    std::vector<Order> getUserOrders(const std::string& username) const;
+    bool removeOrder(const std::string& username, int itemId);
+    bool decreaseOrderQuantity(const std::string& username, int itemId);
+    void clearUserOrders(const std::string& username);
+    bool finalizeOrder(const std::string& username, InventoryManager& inventory);
 };
 
-// ------------------ UserPanel ------------------
 class UserPanel {
-    string username;
+public:
+    UserPanel(const std::string& user, InventoryManager& inv, OrderManager& ordMgr);
+    std::vector<InventoryItem> getAvailableItems() const;
+    std::string getHelpText() const;
+    std::string getSupportInfo() const;
+    void run();
+
+private:
+    std::string username;
     InventoryManager& inventory;
     OrderManager& orderManager;
-
-public:
-    UserPanel(const string& user, InventoryManager& inv, OrderManager& ordMgr);
-    vector<InventoryItem> getAvailableItems() const;
-    string getHelpText() const;
-    string getSupportInfo() const;
-    void run();
 };
 
 #endif // BACKEND_CLASSES_H

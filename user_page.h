@@ -44,7 +44,7 @@ private:
     int selectedItemId = -1;
 
     void loadItemsForCategory(const QString& category);
-    QTableWidget* getTableForCategory(const QString& category);
+    QTableWidget* getTableForCategory(const QString& category) const; // <-- const added here
     void showSettingsDialog();
     int getTotalPurchases() const;
 

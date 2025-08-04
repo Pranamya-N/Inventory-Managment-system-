@@ -2,11 +2,15 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QMap>
-#include "backend_classes.h"
-#include "user_page.h"
-#include "admin_page.h"
-#include "checkout_page.h"
+#include <QtSql>
+#include <QDebug>
+
+// Forward declarations
+class User_page;
+class Admin_page;
+class CheckoutPage;
+
+#include "backend_classes.h"  // includes UserDataStore, InventoryManager, OrderManager
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -21,34 +25,28 @@ public:
     ~MainWindow();
 
 private slots:
+    void on_loginBtn_clicked();
+    void on_registerBtn_clicked();
     void on_adminBtn_clicked();
     void on_userBtn_clicked();
     void on_backBtn_clicked();
-    void on_loginBtn_clicked();
-    void on_registerBtn_clicked();
-
     void on_showPasswordCheckbox_toggled(bool checked);
-
-    void showCheckoutPage();  // <-- Declare the slot here
+    void showCheckoutPage();
+    void resetLoginUI();
 
 private:
     Ui::MainWindow *ui;
-    QString selectedRole;
-
-
-
-    // Track the currently logged-in user (needed for CheckoutPage)
-    QString currentUser;
-
-    InventoryManager inventory;
-    UserDataStore userData;
-    OrderManager orderManager;
 
     User_page* userPageWidget = nullptr;
     Admin_page* adminPageWidget = nullptr;
     CheckoutPage* checkoutPage = nullptr;
 
-    void resetLoginUI();
+    QString currentUser;
+    QString selectedRole;
+
+    UserDataStore userData;              // ✅ Fixed: using proper UserDataStore
+    InventoryManager inventory;
+    OrderManager orderManager;
 
 signals:
     void checkoutRequested();

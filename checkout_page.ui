@@ -15,157 +15,69 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTableWidget" name="cartTable">
-     <property name="columnCount">
-      <number>4</number>
-     </property>
-     <property name="rowCount">
-      <number>0</number>
-     </property>
-     <property name="horizontalHeaderLabels">
-      <stringlist>
-       <string>Item Name</string>
-       <string>Price (Rs.)</string>
-       <string>Quantity</string>
-       <string>Subtotal (Rs.)</string>
-      </stringlist>
-     </property>
-     <property name="alternatingRowColors">
-      <bool>true</bool>
-     </property>
-     <property name="selectionBehavior">
-      <enum>QAbstractItemView::SelectRows</enum>
-     </property>
-     <property name="editTriggers">
-      <enum>QAbstractItemView::NoEditTriggers</enum>
-     </property>
-     <property name="selectionMode">
-      <enum>QAbstractItemView::SingleSelection</enum>
-     </property>
-     <column>
-      <property name="width">
-       <number>450</number> <!-- Item Name wide -->
-      </property>
-     </column>
-     <column>
-      <property name="width">
-       <number>80</number> <!-- Price narrow -->
-      </property>
-     </column>
-     <column>
-      <property name="width">
-       <number>80</number> <!-- Quantity narrow -->
-      </property>
-     </column>
-     <column>
-      <property name="width">
-       <number>150</number> <!-- Subtotal wider -->
-      </property>
-     </column>
+    <widget class="QStackedWidget" name="stackedWidget">
+     <widget class="QWidget" name="pageCartView">
+      <layout class="QVBoxLayout" name="cartLayout">
+       <item>
+        <widget class="QTableWidget" name="cartTable"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelBill">
+         <property name="text">
+          <string>Your bill is Rs. XXXX. Please pay at the counter or deposit to bank account number 123456.</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="buttonLayout">
+         <item>
+          <widget class="QPushButton" name="backButton">
+           <property name="text">
+            <string>Back</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="confirmOrderButton">
+           <property name="text">
+            <string>Confirm Order</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="pageBillView">
+      <layout class="QVBoxLayout" name="billLayout">
+       <item>
+        <widget class="QTableWidget" name="billTable"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="billButtonsLayout">
+         <item>
+          <widget class="QPushButton" name="billBackButton">
+           <property name="text">
+            <string>Back to Cart</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="confirmPaymentButton">
+           <property name="text">
+            <string>Confirm Payment</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
-   <item>
-    <widget class="QLabel" name="labelBill">
-     <property name="text">
-      <string>Your bill is Rs. XXXX. Please pay at the counter or deposit to bank account number 123456.</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="buttonLayout">
-     <item>
-      <widget class="QPushButton" name="backButton">
-       <property name="text">
-        <string>Back</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="confirmOrderButton">
-       <property name="text">
-        <string>Confirm Order</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-
-   <!-- Bill Section: Initially hidden -->
-   <item>
-    <widget class="QWidget" name="billSection">
-     <property name="visible">
-      <bool>false</bool>
-     </property>
-     <layout class="QVBoxLayout" name="billSectionLayout">
-      <item>
-       <widget class="QTableWidget" name="billTable">
-        <property name="columnCount">
-         <number>3</number>
-        </property>
-        <property name="rowCount">
-         <number>0</number>
-        </property>
-        <column>
-         <property name="width">
-          <number>550</number> <!-- Product (Item Name) wide -->
-         </property>
-        </column>
-        <column>
-         <property name="width">
-          <number>100</number> <!-- Quantity narrow -->
-         </property>
-        </column>
-        <column>
-         <property name="width">
-          <number>150</number> <!-- Amount wider -->
-         </property>
-        </column>
-        <property name="horizontalHeaderLabels">
-         <stringlist>
-          <string>Product</string>
-          <string>Quantity</string>
-          <string>Amount (Rs.)</string>
-         </stringlist>
-        </property>
-        <property name="alternatingRowColors">
-         <bool>true</bool>
-        </property>
-        <property name="selectionBehavior">
-         <enum>QAbstractItemView::SelectRows</enum>
-        </property>
-        <property name="editTriggers">
-         <enum>QAbstractItemView::NoEditTriggers</enum>
-        </property>
-        <property name="selectionMode">
-         <enum>QAbstractItemView::SingleSelection</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="billButtonsLayout">
-        <item>
-         <widget class="QPushButton" name="billBackButton">
-          <property name="text">
-           <string>Back to Cart</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="confirmPaymentButton">
-          <property name="text">
-           <string>Confirm Payment</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
-   </item>
-
   </layout>
  </widget>
  <resources/>
